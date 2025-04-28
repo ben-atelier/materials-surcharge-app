@@ -1,7 +1,9 @@
 const express = require('express');
+const cors = require('cors'); 
 const axios = require('axios');
 const app = express();
 
+app.use(cors({ origin: 'https://ateliersociety.com' })); // <-- ALLOW your Shopify domain
 app.use(express.json());
 
 // Your environment variables
