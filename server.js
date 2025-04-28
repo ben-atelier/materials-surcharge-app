@@ -3,21 +3,20 @@ const cors = require('cors');
 const axios = require('axios');
 const app = express();
 
-// ⚡ Correct CORS setup
+// Setup CORS properly
 app.use(cors({
   origin: 'https://ateliersociety.com',
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type']
 }));
-app.options('*', cors()); // handle preflight requests
 
 app.use(express.json());
 
-// Your environment variables
-const SHOPIFY_STORE = process.env.SHOPIFY_STORE; // ex: ateliersociety.myshopify.com
+// Shopify Environment Variables
+const SHOPIFY_STORE = process.env.SHOPIFY_STORE; // Example: ateliersociety.myshopify.com
 const SHOPIFY_ADMIN_API_TOKEN = process.env.SHOPIFY_ADMIN_API_TOKEN;
 
-// Material type to Variant ID mapping
+// Material Type to Variant ID Map
 const materialVariantMap = {
   "Denim/Canvas": "53588940751139",
   "Delicate": "53588940783907",
@@ -26,10 +25,11 @@ const materialVariantMap = {
   "Standard Fabric": "53588941832483"
 };
 
+// Handle POST request
 app.post('/add-surcharge', async (req, res) => {
   const { materialType } = req.body;
 
-  console.log(`Received request to add surcharge for material: ${materialType}`);
+  console.log(`Received material type: ${materialType}`);
 
   if (!materialType || !materialVariantMap[materialType]) {
     return res.status(400).json({ error: 'Invalid or missing material type.' });
@@ -38,7 +38,7 @@ app.post('/add-surcharge', async (req, res) => {
   try {
     const variantId = materialVariantMap[materialType];
 
-    const response = await axios.post(`https://${SHOPIFY_STORE}/cart/add.js`, {
+    await axios.post(`https://${SHOPIFY_STORE}/cart/add.js`, {
       id: variantId,
       quantity: 1
     }, {
@@ -56,7 +56,8 @@ app.post('/add-surcharge', async (req, res) => {
   }
 });
 
+// Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`🚀 Server is running on port ${PORT}`);
 });
