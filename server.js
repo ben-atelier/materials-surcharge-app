@@ -3,6 +3,7 @@ const cors = require('cors');
 const axios = require('axios');
 const app = express();
 
+// CORS Options
 const corsOptions = {
   origin: 'https://ateliersociety.com',
   methods: ['GET', 'POST', 'OPTIONS'],
@@ -10,13 +11,13 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions)); // <-- Very important for preflight OPTIONS requests!
+app.options('*', cors(corsOptions)); // Preflight requests support
 
 app.use(express.json());
 
 // Your environment variables
-const SHOPIFY_STORE = process.env.SHOPIFY_STORE; // ex: 'your-store.myshopify.com'
-const SHOPIFY_ADMIN_API_TOKEN = process.env.SHOPIFY_ADMIN_API_TOKEN; // from Shopify Admin
+const SHOPIFY_STORE = process.env.SHOPIFY_STORE; // Example: 'your-store.myshopify.com'
+const SHOPIFY_ADMIN_API_TOKEN = process.env.SHOPIFY_ADMIN_API_TOKEN; // From Shopify Admin
 
 // Material type to Variant ID mapping
 const materialVariantMap = {
@@ -27,7 +28,13 @@ const materialVariantMap = {
   "Standard Fabric": "53588941832483"
 };
 
+// Handle surcharge adding
 app.post('/add-surcharge', async (req, res) => {
+  // Manual CORS headers (for Vercel strict environments)
+  res.setHeader('Access-Control-Allow-Origin', 'https://ateliersociety.com');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
   const { materialType } = req.body;
 
   console.log(`Received request to add surcharge for material: ${materialType}`);
@@ -39,7 +46,6 @@ app.post('/add-surcharge', async (req, res) => {
   try {
     const variantId = materialVariantMap[materialType];
 
-    // Add the correct variant ID of the Materials Surcharge product
     const response = await axios.post(`https://${SHOPIFY_STORE}/cart/add.js`, {
       id: variantId,
       quantity: 1
@@ -58,7 +64,8 @@ app.post('/add-surcharge', async (req, res) => {
   }
 });
 
+// Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
