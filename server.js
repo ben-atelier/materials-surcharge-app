@@ -3,21 +3,19 @@ const cors = require('cors');
 const axios = require('axios');
 const app = express();
 
-// CORS Options
-const corsOptions = {
+// ⚡ Correct CORS setup
+app.use(cors({
   origin: 'https://ateliersociety.com',
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type']
-};
-
-app.use(cors(corsOptions));
-app.options('*', cors(corsOptions)); // Preflight requests support
+}));
+app.options('*', cors()); // handle preflight requests
 
 app.use(express.json());
 
 // Your environment variables
-const SHOPIFY_STORE = process.env.SHOPIFY_STORE; // Example: 'your-store.myshopify.com'
-const SHOPIFY_ADMIN_API_TOKEN = process.env.SHOPIFY_ADMIN_API_TOKEN; // From Shopify Admin
+const SHOPIFY_STORE = process.env.SHOPIFY_STORE; // ex: ateliersociety.myshopify.com
+const SHOPIFY_ADMIN_API_TOKEN = process.env.SHOPIFY_ADMIN_API_TOKEN;
 
 // Material type to Variant ID mapping
 const materialVariantMap = {
@@ -28,13 +26,7 @@ const materialVariantMap = {
   "Standard Fabric": "53588941832483"
 };
 
-// Handle surcharge adding
 app.post('/add-surcharge', async (req, res) => {
-  // Manual CORS headers (for Vercel strict environments)
-  res.setHeader('Access-Control-Allow-Origin', 'https://ateliersociety.com');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
   const { materialType } = req.body;
 
   console.log(`Received request to add surcharge for material: ${materialType}`);
@@ -51,8 +43,8 @@ app.post('/add-surcharge', async (req, res) => {
       quantity: 1
     }, {
       headers: {
-        'X-Shopify-Access-Token': SHOPIFY_ADMIN_API_TOKEN,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'X-Shopify-Access-Token': SHOPIFY_ADMIN_API_TOKEN
       }
     });
 
@@ -64,7 +56,6 @@ app.post('/add-surcharge', async (req, res) => {
   }
 });
 
-// Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
