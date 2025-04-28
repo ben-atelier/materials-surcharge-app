@@ -1,9 +1,17 @@
 const express = require('express');
-const cors = require('cors'); 
+const cors = require('cors');
 const axios = require('axios');
 const app = express();
 
-app.use(cors({ origin: 'https://ateliersociety.com' })); // <-- ALLOW your Shopify domain
+const corsOptions = {
+  origin: 'https://ateliersociety.com',
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type']
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // <-- Very important for preflight OPTIONS requests!
+
 app.use(express.json());
 
 // Your environment variables
